@@ -1,3 +1,4 @@
+import { format } from "node:util";
 import type { LogLevel } from "./types.js";
 
 const LEVELS: Record<LogLevel, number> = {
@@ -37,13 +38,13 @@ export class Logger {
   private log(level: LogLevel, msg: string, ...args: unknown[]): void {
     if (LEVELS[level] < this.threshold) return;
     const timestamp = new Date().toISOString();
-    const prefix = `${timestamp} [${level.toUpperCase()}]`;
+    const line = `${timestamp} [${level.toUpperCase()}] ${format(msg, ...args)}`;
     if (level === "error") {
-      console.error(prefix, msg, ...args);
+      console.error(line);
     } else if (level === "warn") {
-      console.warn(prefix, msg, ...args);
+      console.warn(line);
     } else {
-      console.log(prefix, msg, ...args);
+      console.log(line);
     }
   }
 }

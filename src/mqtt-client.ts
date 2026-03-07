@@ -19,6 +19,8 @@ export function createMqttClient(
     const options: IClientOptions = {
       clientId: config.clientId,
       clean: true,
+      connectTimeout: 10000,
+      reconnectPeriod: 0, // Disable auto-reconnect for initial connection
       will: {
         topic: lwtTopic,
         payload: Buffer.from("offline"),
@@ -30,11 +32,16 @@ export function createMqttClient(
     if (config.username) options.username = config.username;
     if (config.password) options.password = config.password;
 
+    logger.info("Connecting to MQTT broker at %s", config.url);
     const client = mqtt.connect(config.url, options);
 
     const onConnect = () => {
       client.removeListener("error", onError);
-      logger.info("Connected to MQTT broker at %s", config.url);
+
+      // Enable auto-reconnect after initial connection succeeds
+      client.options.reconnectPeriod = 5000;
+
+      logger.info("Connected to MQTT broker");
 
       const wrapper: MqttWrapper = {
         client,
@@ -77,7 +84,9 @@ export function createMqttClient(
 
     const onError = (err: Error) => {
       client.removeListener("connect", onConnect);
-      reject(err);
+      client.end(true);
+      const detail = err.message || (err as any).code || String(err);
+      reject(new Error(`Failed to connect to MQTT broker at ${config.url}: ${detail}`));
     };
 
     client.once("connect", onConnect);
