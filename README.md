@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/jak/givenergy-mqtt/actions/workflows/ci.yml/badge.svg)](https://github.com/jak/givenergy-mqtt/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/givenergy-mqtt)](https://www.npmjs.com/package/givenergy-mqtt)
+[![Docker](https://img.shields.io/badge/docker-ghcr.io-blue)](https://github.com/jak/givenergy-mqtt/pkgs/container/givenergy-mqtt)
 [![node](https://img.shields.io/node/v/givenergy-mqtt)](https://www.npmjs.com/package/givenergy-mqtt)
 [![license](https://img.shields.io/npm/l/givenergy-mqtt)](https://github.com/jak/givenergy-mqtt/blob/main/LICENSE)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/jak?label=sponsor)](https://github.com/sponsors/jak)
@@ -23,7 +24,24 @@ No cloud. No API keys. No polling delays. Just fast, local, real-time data from 
 
 ## Quick Start
 
-You need Node.js 20+ and an MQTT broker (like [Mosquitto](https://mosquitto.org/)).
+You need an MQTT broker (like [Mosquitto](https://mosquitto.org/)). Pick whichever method suits you:
+
+### Docker (recommended)
+
+```bash
+docker run -d --name givenergy-mqtt \
+  --network host \
+  -e GIVENERGY_HOST=192.168.1.100 \
+  -e MQTT_URL=mqtt://localhost:1883 \
+  --restart unless-stopped \
+  ghcr.io/jak/givenergy-mqtt
+```
+
+Multi-arch image (amd64/arm64) -- works on Raspberry Pi, NAS, or any server.
+
+### npx (no install needed)
+
+Requires Node.js 20+.
 
 ```bash
 npx givenergy-mqtt --host 192.168.1.100
@@ -36,34 +54,49 @@ That's it. Your inverter data is now streaming to MQTT and Home Assistant will d
 If you don't know your inverter's IP:
 
 ```bash
+# Docker
+docker run --rm --network host ghcr.io/jak/givenergy-mqtt --discover
+
+# npx
 npx givenergy-mqtt --discover
 ```
 
 ### With an MQTT broker that needs credentials
 
 ```bash
+# Docker
+docker run -d --name givenergy-mqtt \
+  --network host \
+  -e GIVENERGY_HOST=192.168.1.100 \
+  -e MQTT_URL=mqtt://broker:1883 \
+  -e MQTT_USERNAME=user \
+  -e MQTT_PASSWORD=pass \
+  --restart unless-stopped \
+  ghcr.io/jak/givenergy-mqtt
+
+# npx
 npx givenergy-mqtt --host 192.168.1.100 --mqtt-url mqtt://broker:1883 --mqtt-username user --mqtt-password pass
 ```
 
 ## Installation
 
-### Run directly (no install)
+### Docker
 
 ```bash
-npx givenergy-mqtt --host 192.168.1.100
+docker pull ghcr.io/jak/givenergy-mqtt
 ```
 
-### Install globally
+Images are published to [GitHub Packages](https://github.com/jak/givenergy-mqtt/pkgs/container/givenergy-mqtt) for every release. Tags: `latest`, `1`, `1.0`, `1.0.0`.
+
+### npm
 
 ```bash
+# Run directly (no install)
+npx givenergy-mqtt --host 192.168.1.100
+
+# Or install globally
 npm install -g givenergy-mqtt
 givenergy-mqtt --host 192.168.1.100
-```
-
-### Install as a project dependency
-
-```bash
-npm install givenergy-mqtt
 ```
 
 ## Configuration
@@ -260,6 +293,21 @@ All entities include availability tracking via the bridge's LWT topic.
 
 ## Running as a Service
 
+### Docker Compose (recommended)
+
+```yaml
+services:
+  givenergy-mqtt:
+    image: ghcr.io/jak/givenergy-mqtt
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      GIVENERGY_HOST: 192.168.1.100
+      MQTT_URL: mqtt://localhost:1883
+      # MQTT_USERNAME: user
+      # MQTT_PASSWORD: pass
+```
+
 ### systemd
 
 Create `/etc/systemd/system/givenergy-mqtt.service`:
@@ -286,22 +334,6 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl enable --now givenergy-mqtt
-```
-
-### Docker
-
-```dockerfile
-FROM node:22-slim
-RUN npm install -g givenergy-mqtt
-CMD ["givenergy-mqtt"]
-```
-
-```bash
-docker run -d --name givenergy-mqtt \
-  -e GIVENERGY_HOST=192.168.1.100 \
-  -e MQTT_URL=mqtt://broker:1883 \
-  --restart unless-stopped \
-  givenergy-mqtt
 ```
 
 ## Important Notes

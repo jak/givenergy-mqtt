@@ -14,5 +14,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: googleapis/release-please-action@v4
+        id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add install links to release notes
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.release.outputs.tag_name }}
+          VERSION: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+        run: |
+          BODY=$(gh release view "$TAG" --json body -q .body)
+          FOOTER=$(cat <<EOF
+
+          ---
+
+          ### Install
+
+          **npm:**
+          \`\`\`bash
+          npx givenergy-mqtt@${VERSION}
+          \`\`\`
+          [View on npm](https://www.npmjs.com/package/givenergy-mqtt/v/${VERSION})
+
+          **Docker:**
+          \`\`\`bash
+          docker pull ghcr.io/jak/givenergy-mqtt:${VERSION}
+          \`\`\`
+          [View on GitHub Packages](https://github.com/jak/givenergy-mqtt/pkgs/container/givenergy-mqtt)
+          EOF
+          )
+          gh release edit "$TAG" --notes "${BODY}${FOOTER}"
