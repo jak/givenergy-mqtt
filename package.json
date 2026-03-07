@@ -1,0 +1,48 @@
+{
+  "name": "givenergy-mqtt",
+  "version": "0.1.0",
+  "description": "MQTT bridge for GivEnergy inverters with Home Assistant discovery",
+  "type": "module",
+  "bin": {
+    "givenergy-mqtt": "./dist/cli.js"
+  },
+  "main": "./dist/bridge.js",
+  "types": "./dist/bridge.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev": "tsx src/cli.ts",
+    "prepublishOnly": "npm test && npm run build"
+  },
+  "keywords": [
+    "givenergy",
+    "mqtt",
+    "home-assistant",
+    "solar",
+    "battery",
+    "inverter",
+    "modbus"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "givenergy-modbus": "^1.0.0",
+    "mqtt": "^5.0.0",
+    "yaml": "^2.7.0",
+    "yargs": "^17.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/yargs": "^17.0.0",
+    "tsup": "^8.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^3.0.0"
+  }
+}
