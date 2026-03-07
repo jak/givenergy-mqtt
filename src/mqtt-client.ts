@@ -32,8 +32,13 @@ export function createMqttClient(
     if (config.username) options.username = config.username;
     if (config.password) options.password = config.password;
 
-    logger.info("Connecting to MQTT broker at %s", config.url);
-    const client = mqtt.connect(config.url, options);
+    let url = config.url;
+    if (!/^mqtts?:\/\//.test(url)) {
+      url = `mqtt://${url}`;
+    }
+
+    logger.info("Connecting to MQTT broker at %s", url);
+    const client = mqtt.connect(url, options);
 
     const onConnect = () => {
       client.removeListener("error", onError);
@@ -86,7 +91,7 @@ export function createMqttClient(
       client.removeListener("connect", onConnect);
       client.end(true);
       const detail = err.message || (err as any).code || String(err);
-      reject(new Error(`Failed to connect to MQTT broker at ${config.url}: ${detail}`));
+      reject(new Error(`Failed to connect to MQTT broker at ${url}: ${detail}`));
     };
 
     client.once("connect", onConnect);
