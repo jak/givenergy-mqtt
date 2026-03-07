@@ -10,59 +10,62 @@ async function main() {
     .option("config", {
       alias: "c",
       type: "string",
-      describe: "Path to config file",
+      describe: "Path to config file (e.g. ./givenergy-mqtt.yml)",
       default: "givenergy-mqtt.yml",
     })
     .option("host", {
       alias: "h",
       type: "string",
-      describe: "Inverter IP address",
+      describe: "Inverter IP address (e.g. 192.168.1.100)",
     })
     .option("port", {
       type: "number",
-      describe: "Inverter port",
+      describe: "Inverter Modbus port (default: 8899)",
     })
     .option("poll-interval", {
       type: "number",
-      describe: "Poll interval in milliseconds",
+      describe: "Poll interval in milliseconds (default: 15000)",
     })
     .option("mqtt-url", {
       type: "string",
-      describe: "MQTT broker URL",
+      describe: "MQTT broker URL (e.g. mqtt://192.168.1.10:1883)",
     })
     .option("mqtt-username", {
       type: "string",
-      describe: "MQTT username",
+      describe: "MQTT broker username",
     })
     .option("mqtt-password", {
       type: "string",
-      describe: "MQTT password",
+      describe: "MQTT broker password",
     })
     .option("client-id", {
       type: "string",
-      describe: "MQTT client ID",
+      describe: "MQTT client ID (default: givenergy-mqtt)",
     })
     .option("topic-prefix", {
       type: "string",
-      describe: "MQTT topic prefix",
+      describe: "MQTT topic prefix (default: givenergy)",
     })
     .option("ha-discovery", {
       type: "boolean",
-      describe: "Enable Home Assistant discovery",
+      describe: "Enable Home Assistant MQTT discovery (default: true)",
     })
     .option("ha-prefix", {
       type: "string",
-      describe: "Home Assistant discovery prefix",
+      describe: "HA discovery prefix (default: homeassistant)",
     })
     .option("log-level", {
       type: "string",
       choices: ["debug", "info", "warn", "error"] as const,
-      describe: "Log level",
+      describe: "Log level (default: info)",
     })
     .option("discover", {
       type: "boolean",
       describe: "Auto-discover inverter on local network",
     })
+    .example("$0 --host 192.168.1.100", "Connect to inverter at IP")
+    .example("$0 --host 192.168.1.100 --mqtt-url mqtt://broker:1883", "Specify MQTT broker")
+    .example("$0 --discover", "Auto-find inverter on LAN")
     .help()
     .version()
     .parse();
