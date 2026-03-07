@@ -1,6 +1,13 @@
 # givenergy-mqtt
 
-A lightweight MQTT bridge for GivEnergy solar inverters. Connects directly to your inverter over your local network and publishes real-time data to an MQTT broker, with automatic Home Assistant discovery.
+[![CI](https://github.com/jak/givenergy-mqtt/actions/workflows/ci.yml/badge.svg)](https://github.com/jak/givenergy-mqtt/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/givenergy-mqtt)](https://www.npmjs.com/package/givenergy-mqtt)
+[![node](https://img.shields.io/node/v/givenergy-mqtt)](https://www.npmjs.com/package/givenergy-mqtt)
+[![license](https://img.shields.io/npm/l/givenergy-mqtt)](https://github.com/jak/givenergy-mqtt/blob/main/LICENSE)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/jak?label=sponsor)](https://github.com/sponsors/jak)
+[![Buy Me a Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow)](https://buymeacoffee.com/jakio)
+
+A lightweight MQTT bridge for GivEnergy solar inverters. Connects directly to your inverter over your local network and publishes real-time data to an MQTT broker, with automatic Home Assistant discovery. Built on [`givenergy-modbus`](https://github.com/jak/givenergy-modbus).
 
 No cloud. No API keys. No polling delays. Just fast, local, real-time data from your inverter straight into MQTT.
 
