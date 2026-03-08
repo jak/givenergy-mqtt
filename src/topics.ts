@@ -20,6 +20,10 @@ export class TopicBuilder {
     return `${this.prefix}/${this.serial}/battery/${batterySerial}/${key}`;
   }
 
+  meter(meterAddress: string, key: string): string {
+    return `${this.prefix}/${this.serial}/meter/${meterAddress}/${key}`;
+  }
+
   command(name: string): string {
     return `${this.prefix}/${this.serial}/command/${name}`;
   }

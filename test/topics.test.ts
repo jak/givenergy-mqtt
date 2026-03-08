@@ -27,6 +27,12 @@ describe("TopicBuilder", () => {
     );
   });
 
+  it("builds meter topics", () => {
+    expect(topics.meter("1", "active_power_total")).toBe(
+      "givenergy/CE1234G567/meter/1/active_power_total",
+    );
+  });
+
   it("builds command topics", () => {
     expect(topics.command("set_mode")).toBe(
       "givenergy/CE1234G567/command/set_mode",

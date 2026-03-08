@@ -1,6 +1,6 @@
 {
   "name": "givenergy-mqtt",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "MQTT bridge for GivEnergy inverters with Home Assistant discovery",
   "type": "module",
   "bin": {
@@ -32,7 +32,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "givenergy-modbus": "^1.0.0",
+    "givenergy-modbus": "^1.1.1",
     "mqtt": "^5.0.0",
     "yaml": "^2.7.0",
     "yargs": "^17.7.0"

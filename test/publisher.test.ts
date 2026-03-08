@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { publishSnapshot, STATE_MAPPINGS, BATTERY_MAPPINGS } from "../src/publisher.js";
+import { publishSnapshot, STATE_MAPPINGS, BATTERY_MAPPINGS, METER_MAPPINGS } from "../src/publisher.js";
 import { TopicBuilder } from "../src/topics.js";
 import { createMockSnapshot, createMockMqtt } from "./helpers.js";
 
@@ -80,13 +80,80 @@ describe("publishSnapshot", () => {
     expect(find("voltage")!.payload).toBe("51.2");
     expect(find("temp_max")!.payload).toBe("23.5");
     expect(find("cycles")!.payload).toBe("450");
+    expect(find("temp_min")!.payload).toBe("21.2");
+    expect(find("charge_energy_total")!.payload).toBe("5000");
+    expect(find("discharge_energy_total")!.payload).toBe("4800");
+    expect(find("cell_voltages")!.payload).toBe(
+      JSON.stringify(Array(16).fill(3.2)),
+    );
+  });
+
+  it("publishes meter module data", async () => {
+    await publishSnapshot(mqtt, topics, snapshot);
+    for (const mapping of METER_MAPPINGS) {
+      const msg = mqtt.published.find(
+        (p) => p.topic === `givenergy/CE1234G567/meter/1/${mapping.key}`,
+      );
+      expect(msg, `Missing meter topic for ${mapping.key}`).toBeDefined();
+      expect(msg!.retain).toBe(true);
+    }
+  });
+
+  it("publishes correct meter values", async () => {
+    await publishSnapshot(mqtt, topics, snapshot);
+    const find = (key: string) =>
+      mqtt.published.find(
+        (p) => p.topic === `givenergy/CE1234G567/meter/1/${key}`,
+      );
+    expect(find("active_power_total")!.payload).toBe("2500");
+    expect(find("frequency")!.payload).toBe("50.01");
+    expect(find("import_energy")!.payload).toBe("3200.1");
+    expect(find("voltage")!.payload).toBe(JSON.stringify([242.5, 0, 0]));
+  });
+
+  it("publishes power flow values", async () => {
+    await publishSnapshot(mqtt, topics, snapshot);
+    const find = (key: string) =>
+      mqtt.published.find(
+        (p) => p.topic === `givenergy/CE1234G567/state/${key}`,
+      );
+    expect(find("solar_to_house")!.payload).toBe("2000");
+    expect(find("solar_to_battery")!.payload).toBe("1000");
+    expect(find("solar_to_grid")!.payload).toBe("500");
+    expect(find("battery_to_house")!.payload).toBe("0");
+    expect(find("grid_to_house")!.payload).toBe("0");
+  });
+
+  it("publishes JSON topics for slots", async () => {
+    await publishSnapshot(mqtt, topics, snapshot);
+    const find = (key: string) =>
+      mqtt.published.find(
+        (p) => p.topic === `givenergy/CE1234G567/state/${key}`,
+      );
+    expect(find("charge_slots")!.payload).toBe(
+      JSON.stringify(snapshot.chargeSlots),
+    );
+    expect(find("discharge_slots")!.payload).toBe(
+      JSON.stringify(snapshot.dischargeSlots),
+    );
+  });
+
+  it("publishes system_time as ISO string", async () => {
+    await publishSnapshot(mqtt, topics, snapshot);
+    const msg = mqtt.published.find(
+      (p) => p.topic === "givenergy/CE1234G567/state/system_time",
+    );
+    expect(msg!.payload).toBe("2026-03-07T12:00:00.000Z");
   });
 
   it("publishes correct total count of messages", async () => {
     await publishSnapshot(mqtt, topics, snapshot);
-    // 1 snapshot + STATE_MAPPINGS + (1 battery * BATTERY_MAPPINGS)
+    // 1 snapshot + STATE_MAPPINGS + (1 battery * BATTERY_MAPPINGS) + (1 meter * METER_MAPPINGS)
     const expected =
-      1 + STATE_MAPPINGS.length + snapshot.batteries.length * BATTERY_MAPPINGS.length;
+      1 +
+      STATE_MAPPINGS.length +
+      snapshot.batteries.length * BATTERY_MAPPINGS.length +
+      snapshot.meters.length * METER_MAPPINGS.length;
     expect(mqtt.published.length).toBe(expected);
   });
 });
